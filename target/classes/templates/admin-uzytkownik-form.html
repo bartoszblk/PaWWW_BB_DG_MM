@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Formularz Użytkownika</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .form-group { margin-bottom: 15px; max-width: 400px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 8px; border: 1px solid #000; }
+        .error { color: #d90000; font-weight: bold; font-size: 0.9em; }
+        .btn { padding: 10px 15px; background-color: #3634a8; color: #fff; border: 1px solid #000000; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+<h1 th:text="${uzytkownik.id == null ? 'Nowy Użytkownik' : 'Edycja Użytkownika'}"></h1>
+
+<form th:action="@{/admin/uzytkownicy/zapisz}" th:object="${uzytkownik}" method="post">
+    <input type="hidden" th:field="*{id}" />
+
+    <div class="form-group">
+        <label>Login:</label>
+        <input type="text" th:field="*{login}" />
+        <span class="error" th:if="${#fields.hasErrors('login')}" th:errors="*{login}"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Hasło (wpisz aby zmienić):</label>
+        <input type="text" th:field="*{haslo}" />
+        <span class="error" th:if="${#fields.hasErrors('haslo')}" th:errors="*{haslo}"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Imię:</label>
+        <input type="text" th:field="*{imie}" />
+        <span class="error" th:if="${#fields.hasErrors('imie')}" th:errors="*{imie}"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Nazwisko:</label>
+        <input type="text" th:field="*{nazwisko}" />
+        <span class="error" th:if="${#fields.hasErrors('nazwisko')}" th:errors="*{nazwisko}"></span>
+    </div>
+
+    <div class="form-group">
+        <label>PESEL:</label>
+        <input type="text" th:field="*{pesel}" />
+        <span class="error" th:if="${#fields.hasErrors('pesel')}" th:errors="*{pesel}"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Rola:</label>
+        <select th:field="*{idRoli}">
+            <option th:each="rola : ${role}" th:value="${rola.idRoli}" th:text="${rola.nazwa}"></option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn">Zapisz do bazy</button>
+    <a th:href="@{/admin/uzytkownicy}" style="margin-left: 10px; color: #000; font-weight: bold;">Anuluj</a>
+</form>
+</body>
+</html>

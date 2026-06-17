@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Koszyk Głosów</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #ffffff; color: #000000; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #000000; padding: 12px; text-align: left; }
+        th { background-color: #f2f2f2; font-weight: bold; }
+
+        .btn { padding: 10px 15px; font-weight: bold; border-radius: 4px; text-decoration: none; border: 1px solid transparent; display: inline-block; cursor: pointer; text-align: center; box-sizing: border-box; }
+        .btn-primary { background-color: #3634a8; color: #ffffff; }
+        .btn-danger { background-color: #d90000; color: #ffffff; }
+        .btn-success { background-color: #008000; color: #ffffff; }
+
+        .action-buttons { display: flex; gap: 15px; margin-top: 20px; align-items: flex-start; }
+    </style>
+</head>
+<body>
+
+<h1>Twój Koszyk Głosów</h1>
+
+<div th:if="${komunikatBlad}" style="background-color: #f8d7da; color: #721c24; padding: 15px; margin-bottom: 20px; border: 1px solid #f5c6cb; border-radius: 4px; font-weight: bold; text-align: center;">
+    <span th:text="${komunikatBlad}"></span>
+</div>
+
+<div th:if="${#maps.isEmpty(zawartoscKoszyka)}">
+    <p style="font-weight: bold; margin-top: 20px; margin-bottom: 20px;">Twój koszyk jest obecnie pusty.</p>
+    <a th:href="@{/projekty}" class="btn btn-primary">Wróć do listy projektów</a>
+</div>
+
+<div th:unless="${#maps.isEmpty(zawartoscKoszyka)}">
+    <table>
+        <thead>
+        <tr>
+            <th>Projekt</th>
+            <th>Oddany Głos</th>
+            <th>Akcje</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="wpis : ${zawartoscKoszyka}">
+            <td th:text="${wpis.key.title}"></td>
+            <td th:text="${wpis.value}" th:style="${wpis.value == 'ZA' ? 'color: green; font-weight: bold;' : 'color: red; font-weight: bold;'}"></td>
+            <td>
+                <form th:action="@{/koszyk/usun}" method="post" style="margin: 0;">
+                    <input type="hidden" name="projektId" th:value="${wpis.key.id}" />
+                    <button type="submit" class="btn btn-danger">Usuń z koszyka</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="action-buttons">
+        <form th:action="@{/koszyk/zatwierdz}" method="post" style="margin: 0;">
+            <button type="submit" class="btn btn-success">Zatwierdź głosy</button>
+        </form>
+        <a th:href="@{/projekty}" class="btn btn-primary">Wróć do listy projektów</a>
+    </div>
+</div>
+
+</body>
+</html>

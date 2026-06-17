@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Zgłoś Projekt</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #ffffff; color: #000000; padding: 20px; }
+        .form-container { max-width: 600px; margin: 0 auto; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input, textarea, select { padding: 8px; border: 1px solid #000000; box-sizing: border-box; }
+        input:disabled, select:disabled { background-color: #e9ecef; cursor: not-allowed; }
+        .wide-input { width: 100%; max-width: 450px; }
+        .narrow-input { width: 100%; max-width: 250px; }
+        .error { color: #d90000; font-weight: bold; font-size: 0.9em; display: block; margin-top: 5px; }
+        button { padding: 10px 20px; background-color: #3634a8; color: #ffffff; font-weight: bold; border: none; cursor: pointer; margin-right: 15px; border-radius: 4px; }
+        a { color: #000000; text-decoration: underline; font-weight: bold; }
+        .admin-panel { background-color: #f8f9fa; padding: 15px; border: 1px dashed #000; margin-bottom: 20px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h1 th:text="${projekt.id == null ? 'Zgłoszenie nowego projektu' : 'Edycja projektu'}"></h1>
+
+    <div th:if="${komunikatBlad}" style="background-color: #f8d7da; color: #721c24; padding: 15px; margin-bottom: 20px; border: 1px solid #f5c6cb; border-radius: 4px; text-align: center; font-weight: bold;">
+        <span th:text="${komunikatBlad}"></span>
+    </div>
+
+    <form th:action="${projekt.id == null ? '/projekty/nowy' : '/projekty/edytuj/' + projekt.id}" th:object="${projekt}" method="post">
+
+        <div sec:authorize="hasAnyRole('URZEDNIK')" class="admin-panel" th:if="${projekt.id != null}">
+            <h3 style="margin-top: 0; color: #3634a8;">Panel Weryfikacyjny Urzędnika</h3>
+
+            <div class="form-group">
+                <label for="idStatusu">Status Projektu:</label>
+                <select id="idStatusu" class="narrow-input" th:field="*{idStatusu}">
+                    <option th:each="stat : ${listaStatusow}" th:value="${stat.idStatusu}" th:text="${stat.nazwa}"></option>
+                </select>
+                <span class="error" th:if="${#fields.hasErrors('idStatusu')}" th:errors="*{idStatusu}"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="dataRozpoczecia">Data rozpoczęcia głosowania:</label>
+                <input type="date" id="dataRozpoczecia" class="narrow-input" th:field="*{dataRozpoczecia}"/>
+                <span class="error" th:if="${#fields.hasErrors('dataRozpoczecia')}" th:errors="*{dataRozpoczecia}"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="dataZakonczenia">Data zakończenia głosowania:</label>
+                <input type="date" id="dataZakonczenia" class="narrow-input" th:field="*{dataZakonczenia}"/>
+                <span class="error" th:if="${#fields.hasErrors('dataZakonczenia')}" th:errors="*{dataZakonczenia}"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="czyTajne">Tryb głosowania:</label>
+                <select id="czyTajne" class="narrow-input" th:field="*{czyTajne}">
+                    <option value="0">Jawne (widoczna lista wspierających)</option>
+                    <option value="1">Tajne (tylko liczba głosów)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="title">Tytuł projektu:</label>
+            <input type="text" id="title" class="wide-input" th:field="*{title}" required minlength="5" maxlength="150"/>
+            <span class="error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Opis projektu:</label>
+            <textarea id="description" class="wide-input" th:field="*{description}" rows="5" required minlength="10"></textarea>
+            <span class="error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="osiedle">Osiedle:</label>
+            <select id="osiedle" class="narrow-input" th:field="*{osiedle}" required>
+                <option value="">> Wybierz osiedle <</option>
+                <option th:each="os : ${listaOsiedli}" th:value="${os.idOsiedla}" th:text="${os.nazwa}"></option>
+            </select>
+            <span class="error" th:if="${#fields.hasErrors('osiedle')}" th:errors="*{osiedle}"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="szacowanyKoszt">Koszt projektu (PLN):</label>
+            <input type="number" id="szacowanyKoszt" class="narrow-input" th:field="*{szacowanyKoszt}" required min="1" step="0.01"/>
+            <span class="error" th:if="${#fields.hasErrors('szacowanyKoszt')}" th:errors="*{szacowanyKoszt}"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="kategoria">Kategoria:</label>
+            <select id="kategoria" class="narrow-input" th:field="*{kategoria}" required>
+                <option value="">> Wybierz kategorię <</option>
+                <option th:each="kat : ${listaKategorii}" th:value="${kat.idKategorii}" th:text="${kat.nazwa}"></option>
+            </select>
+            <span class="error" th:if="${#fields.hasErrors('kategoria')}" th:errors="*{kategoria}"></span>
+        </div>
+
+        <button type="submit">Zapisz projekt</button>
+        <a th:href="@{/projekty}">Anuluj</a>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusSelect = document.getElementById('idStatusu');
+        const startData = document.getElementById('dataRozpoczecia');
+        const endData = document.getElementById('dataZakonczenia');
+        const tryb = document.getElementById('czyTajne');
+
+        function toggleFields() {
+            if(statusSelect && statusSelect.value === '3') {
+                startData.disabled = true;
+                endData.disabled = true;
+                tryb.disabled = true;
+            } else if (statusSelect) {
+                startData.disabled = false;
+                endData.disabled = false;
+                tryb.disabled = false;
+            }
+        }
+
+        if (statusSelect) {
+            statusSelect.addEventListener('change', toggleFields);
+            toggleFields();
+        }
+    });
+</script>
+
+</body>
+</html>

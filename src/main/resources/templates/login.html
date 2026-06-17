@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Logowanie do systemu Budżet Obywatelski</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #ffffff; color: #000000; padding: 20px; }
+        .login-container { max-width: 400px; margin: 50px auto; padding: 20px; border: 1px solid #000000; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input { width: 100%; padding: 8px; border: 1px solid #000000; box-sizing: border-box; }
+        button { padding: 10px 20px; background-color: #3634a8; color: #ffffff; font-weight: bold; border: none; cursor: pointer; width: 100%; }
+        .error { color: #d90000; font-weight: bold; margin-bottom: 15px; }
+        .success { color: #008000; font-weight: bold; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <h2>Logowanie</h2>
+
+    <div th:if="${param.error}" class="error">
+        Nieprawidłowy login lub hasło.
+    </div>
+    <div th:if="${param.logout}" class="success">
+        Wylogowano pomyślnie.
+    </div>
+
+    <form th:action="@{/login}" method="post">
+        <div class="form-group">
+            <label for="username">Login:</label>
+            <input type="text" id="username" name="username" required autofocus/>
+        </div>
+        <div class="form-group">
+            <label for="password">Hasło:</label>
+            <input type="password" id="password" name="password" required/>
+        </div>
+        <button type="submit">Zaloguj się</button>
+    </form>
+</div>
+</body>
+</html>

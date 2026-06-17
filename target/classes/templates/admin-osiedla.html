@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml" lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista osiedli</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        table { width: 100%; max-width: 600px; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #000; padding: 10px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .btn { padding: 6px 12px; text-decoration: none; font-weight: bold; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background-color: #3634a8; }
+        .btn-danger { background-color: #d90000; }
+        .form-panel { background-color: #f8f9fa; padding: 15px; border: 1px solid #000; max-width: 570px; margin-bottom: 20px; }
+        input[type="text"] { padding: 6px; border: 1px solid #000; width: 250px; }
+    </style>
+</head>
+<body>
+<h1>Lista osiedli</h1>
+<a sec:authorize="hasRole('ADMINISTRATOR')" th:href="@{/admin}" class="btn btn-primary" style="background-color: #6c757d; margin-bottom: 20px; display: inline-block;">Powrót do Panelu</a>
+<a sec:authorize="hasRole('URZEDNIK')" th:href="@{/urzednik}" class="btn btn-primary" style="background-color: #6c757d; margin-bottom: 20px; display: inline-block;">Powrót do Panelu</a>
+
+<div class="form-panel">
+    <h3>Dodaj nowe osiedle</h3>
+    <form th:action="@{/admin/osiedla/zapisz}" method="post">
+        <input type="text" name="nazwa" required minlength="3" maxlength="50" placeholder="Nazwa osiedla..." />
+        <button type="submit" class="btn btn-primary">Zapisz</button>
+    </form>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>Nazwa Osiedla</th>
+        <th>Akcje</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="o : ${osiedla}">
+        <td th:text="${o.nazwa}"></td>
+        <td>
+            <form th:action="@{/admin/osiedla/usun/{id}(id=${o.idOsiedla})}" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Czy na pewno chcesz usunąć to osiedle? UWAGA: Może to naruszyć integralność projektów!')">Usuń</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

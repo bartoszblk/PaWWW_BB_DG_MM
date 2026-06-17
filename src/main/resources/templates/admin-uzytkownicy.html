@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Zarządzanie użytkownikami</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #000; padding: 10px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .btn { padding: 6px 12px; text-decoration: none; font-weight: bold; color: #fff; border: 1px solid #000000; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background-color: #3634a8; }
+        .btn-warning { background-color: #ff9900; color: #000; }
+        .btn-danger { background-color: #d90000; }
+    </style>
+</head>
+<body>
+<h1>Konta użytkowników</h1>
+
+<a th:href="@{/admin/uzytkownicy/formularz}" class="btn btn-primary">Dodaj nowego użytkownika</a>
+<a th:href="@{/admin}" class="btn btn-primary" style="background-color: #6c757d;">Powrót do panelu</a>
+
+<table>
+    <thead>
+    <tr>
+        <th>Login</th>
+        <th>Imię i Nazwisko</th>
+        <th>PESEL</th>
+        <th>Rola</th>
+        <th>Akcje</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="u : ${uzytkownicy}">
+        <td th:text="${u.login}"></td>
+        <td th:text="${u.imie + ' ' + u.nazwisko}"></td>
+        <td th:text="${u.pesel}"></td>
+        <td th:text="${roleMap.get(u.idRoli)}"></td>
+        <td>
+            <a th:href="@{/admin/uzytkownicy/formularz(id=${u.id})}" class="btn btn-warning">Edytuj</a>
+            <form th:action="@{/admin/uzytkownicy/usun/{id}(id=${u.id})}" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Czy na pewno chcesz usunąć to konto?')">Usuń</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

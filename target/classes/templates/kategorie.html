@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Kategorie Projektów</title>
+</head>
+<body>
+<h1>Dostępne Kategorie w Budżecie Obywatelskim</h1>
+<ul>
+    <li th:each="kategoria : ${listaKategorii}" th:text="${kategoria.nazwa}"></li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Ranking Projektów</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #ffffff; color: #000000; }
+        h1 { text-align: center; color: #3634a8; }
+        table { width: 100%; max-width: 900px; margin: 20px auto; border-collapse: collapse; }
+        th, td { border: 1px solid #000000; padding: 12px; text-align: left; }
+        th { background-color: #f2f2f2; font-weight: bold; }
+        .btn { padding: 10px 15px; font-weight: bold; border-radius: 4px; text-decoration: none; border: 1px solid #000000; display: inline-block; cursor: pointer; }
+        .btn-primary { background-color: #3634a8; color: #ffffff; }
+        .top-3 { font-weight: bold; background-color: #fff3cd; }
+    </style>
+</head>
+<body>
+
+<h1>Aktualny Ranking Głosowania</h1>
+
+<div style="text-align: center; margin-bottom: 20px;">
+    <a th:href="@{/projekty}" class="btn btn-primary">Wróć do listy projektów</a>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>Miejsce</th>
+        <th>Tytuł Projektu</th>
+        <th>Kategoria</th>
+        <th>Osiedle</th>
+        <th>Liczba oddanych głosów</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="r, iterStat : ${ranking}" th:classappend="${iterStat.index < 3} ? 'top-3' : ''">
+        <td th:text="${iterStat.count}"></td>
+        <td th:text="${r.tytul}"></td>
+        <td th:text="${r.kategoria}"></td>
+        <td th:text="${r.osiedle}"></td>
+        <td th:text="${r.liczbaGlosow} + ' głosów'" style="font-weight: bold; text-align: center; color: #008000;"></td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

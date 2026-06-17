@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista Projektów</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #ffffff; color: #000000; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #000000; padding: 12px; text-align: left; vertical-align: middle; }
+        th { background-color: #f2f2f2; font-weight: bold; }
+        a { color: #0000ee; text-decoration: underline; font-weight: bold; }
+        .table-container { max-width: 100%; }
+
+        .top-bar { text-align: right; padding: 12px; background-color: #f2f2f2; border-bottom: 1px solid #000000; margin-bottom: 20px; }
+
+        /* UNIFIKACJA GUZIKÓW */
+        .btn { padding: 8px 16px; font-weight: bold; border-radius: 4px; text-decoration: none; border: 1px solid transparent; display: inline-block; cursor: pointer; text-align: center; box-sizing: border-box; }
+        .btn-primary { background-color: #3634a8; color: #ffffff; border-color: #3634a8; }
+        .btn-danger { background-color: #d90000; color: #ffffff; border-color: #d90000; }
+        .btn-success { background-color: #008000; color: #ffffff; border-color: #008000; }
+        .btn-warning { background-color: #ff9900; color: #000000; border-color: #ff9900; }
+        .btn-secondary { background-color: #6c757d; color: #ffffff; border-color: #6c757d; }
+
+        /* Nowe style */
+        .btn-admin { background-color: #0056b3; color: #ffffff; border-color: #0056b3; }
+        .btn-pastel-success { background-color: #a8d5a8; color: #ffffff; border-color: #a8d5a8; cursor: not-allowed; }
+        .btn-pastel-danger { background-color: #f5a8a8; color: #ffffff; border-color: #f5a8a8; cursor: not-allowed; }
+
+        .filter-panel { background-color: #f8f9fa; padding: 15px; margin-bottom: 20px; border: 1px solid #000000; }
+        .filter-form { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
+        .filter-group { display: flex; flex-direction: column; }
+        .filter-group label { font-weight: bold; margin-bottom: 5px; }
+        .filter-group select, .filter-group input { padding: 6px; border: 1px solid #000; border-radius: 4px; }
+        .action-bar { margin-bottom: 15px; display: flex; gap: 10px; align-items: center; }
+
+        .tooltip { position: relative; display: inline-block; border-bottom: 1px dotted #3634a8; cursor: help; color: #3634a8; font-weight: bold; }
+        .tooltip .tooltiptext { visibility: hidden; width: 350px; background-color: #f8f9fa; color: #000; text-align: left; border: 1px solid #000; border-radius: 6px; padding: 12px; position: absolute; z-index: 999; top: 100%; left: 0; margin-top: 8px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); font-weight: normal; font-size: 0.9em; }
+        .tooltip:hover .tooltiptext { visibility: visible; }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div sec:authorize="isAnonymous()">
+        <span style="font-weight: bold; margin-right: 15px;">Przeglądasz jako Gość</span>
+        <a th:href="@{/login}" class="btn btn-primary">Zaloguj się</a>
+    </div>
+
+    <div sec:authorize="isAuthenticated()">
+        Zalogowany jako:
+        <span th:text="${zalogowanyUzytkownik.imie + ' ' + zalogowanyUzytkownik.nazwisko}" style="font-weight: bold; color: #3634a8;"></span>
+        <span style="font-style: normal; margin-right: 20px;">
+            (<span sec:authorize="hasRole('OBYWATEL')">Obywatel</span><span sec:authorize="hasRole('URZEDNIK')">Urzędnik</span><span sec:authorize="hasRole('ADMINISTRATOR')">Administrator</span>)
+        </span>
+        <a th:href="@{/koszyk}" class="btn btn-primary" style="margin-right: 10px;">Przejdź do koszyka głosów</a>
+        <form th:action="@{/logout}" method="post" style="display: inline;">
+            <button type="submit" class="btn btn-danger">Wyloguj się</button>
+        </form>
+    </div>
+</div>
+
+<h1>System Budżetu Obywatelskiego</h1>
+
+<div th:if="${komunikatSukces}" style="background-color: #cce5ff; color: #004085; padding: 15px; margin-bottom: 20px; border: 1px solid #b8daff; border-radius: 4px; text-align: center; font-weight: bold;"><span th:text="${komunikatSukces}"></span></div>
+<div th:if="${komunikatBlad}" style="background-color: #f8d7da; color: #721c24; padding: 15px; margin-bottom: 20px; border: 1px solid #f5c6cb; border-radius: 4px; text-align: center; font-weight: bold;"><span th:text="${komunikatBlad}"></span></div>
+<div th:if="${komunikat}" style="background-color: #d4edda; color: #155724; padding: 15px; margin-bottom: 20px; border: 1px solid #c3e6cb; border-radius: 4px; text-align: center; font-weight: bold;"><span th:text="${komunikat}"></span></div>
+
+<div class="action-bar">
+    <div sec:authorize="isAuthenticated()">
+        <a th:href="@{/projekty/nowy}" class="btn btn-primary">Dodaj nowy projekt</a>
+    </div>
+
+    <button id="toggleFilterBtn" class="btn btn-secondary" type="button">
+        <span id="toggleFilterText" th:text="${(wybranaKategoria != null or wybranaDataOd != null or (wybraneSortowanie != null and wybraneSortowanie != '')) ? 'Ukryj opcje filtrowania' : 'Pokaż Filtrowanie i Sortowanie'}"></span>
+    </button>
+
+    <a th:href="@{/ranking}" class="btn btn-warning">Zobacz Ranking</a>
+
+    <a sec:authorize="hasRole('ADMINISTRATOR')" th:href="@{/admin}" class="btn btn-admin" style="margin-left: auto;">Panel Admina</a>
+    <a sec:authorize="hasRole('URZEDNIK')" th:href="@{/urzednik}" class="btn btn-admin" style="margin-left: auto;">Panel Urzędnika</a>
+</div>
+
+<div id="filterPanel" class="filter-panel" th:style="${(wybranaKategoria != null or wybranaDataOd != null or (wybraneSortowanie != null and wybraneSortowanie != '')) ? 'display: block;' : 'display: none;'}">
+    <form th:action="@{/projekty}" method="get" class="filter-form">
+        <div class="filter-group">
+            <label for="kategoriaId">Kategoria:</label>
+            <select name="kategoriaId" id="kategoriaId">
+                <option value="">Wszystkie kategorie</option>
+                <option th:each="kat : ${listaKategorii}" th:value="${kat.idKategorii}" th:text="${kat.nazwa}" th:selected="${kat.idKategorii == wybranaKategoria}"></option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="dataOd">Data od:</label>
+            <input type="date" name="dataOd" id="dataOd" th:value="${wybranaDataOd}">
+        </div>
+        <div class="filter-group">
+            <label for="sort">Sortowanie:</label>
+            <select name="sort" id="sort">
+                <option value="">Domyślne priorytety statusów</option>
+                <option value="koszt_asc" th:selected="${wybraneSortowanie == 'koszt_asc'}">Koszt (rosnąco)</option>
+                <option value="koszt_desc" th:selected="${wybraneSortowanie == 'koszt_desc'}">Koszt (malejąco)</option>
+                <option value="data_asc" th:selected="${wybraneSortowanie == 'data_asc'}">Data rozpoczęcia (rosnąco)</option>
+                <option value="data_desc" th:selected="${wybraneSortowanie == 'data_desc'}">Data rozpoczęcia (malejąco)</option>
+            </select>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary">Filtruj i Sortuj</button>
+            <a th:href="@{/projekty}" class="btn btn-secondary" style="margin-left: 10px;">Wyczyść filtry</a>
+        </div>
+    </form>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+        <tr>
+            <th>Tytuł Projektu (najedź)</th>
+            <th>Osiedle</th>
+            <th>Koszt (PLN)</th>
+            <th>Kategoria</th>
+            <th>Rozpoczęcie</th>
+            <th>Zakończenie</th>
+            <th>Typ głosowania</th>
+            <th>Głosowanie / Status</th>
+            <th sec:authorize="hasAnyRole('URZEDNIK', 'ADMINISTRATOR')">Zarządzanie</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="p : ${listaProjektow}">
+            <td>
+                <div class="tooltip">
+                    <span th:text="${p.title}"></span>
+                    <span class="tooltiptext" th:text="${p.description}"></span>
+                </div>
+            </td>
+            <td th:text="${p.osiedle.nazwa}"></td>
+            <td th:text="${p.szacowanyKoszt}"></td>
+            <td th:text="${p.kategoria.nazwa}"></td>
+
+            <td th:text="${p.dataRozpoczecia != null ? #temporals.format(p.dataRozpoczecia, 'dd.MM.yyyy') : '-'}"></td>
+            <td th:text="${p.dataZakonczenia != null ? #temporals.format(p.dataZakonczenia, 'dd.MM.yyyy') : '-'}"></td>
+
+            <td style="text-align: center;">
+                <span th:text="${p.czyTajne == 1 ? 'Tajne' : 'Jawne'}" style="font-weight: bold; display: block; margin-bottom: 8px;"></span>
+                <a th:if="${p.czyTajne == 0 and (p.idStatusu == 4 or p.idStatusu == 5)}" th:href="@{/projekty/{id}/poparcie(id=${p.id})}" class="btn btn-primary" style="background-color: #17a2b8; border-color: #17a2b8; padding: 4px 8px; font-size: 0.85em; width: 100%;">Poparcie</a>
+            </td>
+
+            <td style="text-align: center;">
+
+                <div th:if="${p.idStatusu == 1}" style="font-weight: bold; color: #6c757d;">Projekt zgłoszony.</div>
+                <div th:if="${p.idStatusu == 2}" style="font-weight: bold; color: #17a2b8;">Projekt zatwierdzony.<br>Oczekuje na głosowanie.</div>
+                <div th:if="${p.idStatusu == 3}" style="font-weight: bold; color: #d90000;">Projekt odrzucony.</div>
+
+                <div th:if="${p.idStatusu == 4}" sec:authorize="isAnonymous()" style="font-weight: bold; color: #008000;">
+                    Głosowanie Trwa! (Zaloguj się)
+                </div>
+
+                <div th:if="${p.idStatusu == 4}" sec:authorize="isAuthenticated()">
+                    <div th:if="${zaglosowaneProjekty != null and zaglosowaneProjekty.contains(p.id)}">
+                        <button class="btn btn-pastel-success" style="width: 100%; margin-bottom: 5px;" disabled>ZA</button>
+                        <button class="btn btn-pastel-danger" style="width: 100%;" disabled>PRZECIW</button>
+                        <div style="font-size: 0.8em; font-weight: bold; margin-top: 5px; color: #6c757d;">Twój głos został oddany</div>
+                    </div>
+
+                    <div th:unless="${zaglosowaneProjekty != null and zaglosowaneProjekty.contains(p.id)}">
+                        <form th:action="@{/koszyk/dodaj}" method="post" style="margin-bottom: 5px;">
+                            <input type="hidden" name="projektId" th:value="${p.id}" />
+                            <input type="hidden" name="decyzja" value="ZA" />
+                            <button type="submit" class="btn btn-success" style="width: 100%;">ZA</button>
+                        </form>
+                        <form th:action="@{/koszyk/dodaj}" method="post">
+                            <input type="hidden" name="projektId" th:value="${p.id}" />
+                            <input type="hidden" name="decyzja" value="PRZECIW" />
+                            <button type="submit" class="btn btn-danger" style="width: 100%;">PRZECIW</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div th:if="${p.idStatusu == 5}" style="font-weight: bold; color: #000000; font-size: 0.9em;">
+                    Głosowanie zakończone.<br>
+                    <span style="color: #008000;">ZA: <span th:text="${statystykiZa.get(p.id)}"></span></span> |
+                    <span style="color: #d90000;">PRZECIW: <span th:text="${statystykiPrzeciw.get(p.id)}"></span></span>
+                </div>
+            </td>
+
+            <td sec:authorize="hasAnyRole('URZEDNIK', 'ADMINISTRATOR')">
+                <a th:href="@{/projekty/edytuj/{id}(id=${p.id})}" class="btn btn-warning" style="margin-bottom: 5px; display: block;">Edytuj</a>
+                <form th:action="@{/projekty/usun/{id}(id=${p.id})}" method="post">
+                    <button type="submit" class="btn btn-danger" style="width: 100%;">Usuń</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${#lists.isEmpty(listaProjektow)}" style="text-align: center; margin-top: 20px; font-weight: bold;">
+        Nie znaleziono projektów spełniających podane kryteria.
+    </div>
+</div>
+
+<script>
+    document.getElementById('toggleFilterBtn').addEventListener('click', function() {
+        var panel = document.getElementById('filterPanel');
+        var text = document.getElementById('toggleFilterText');
+        if (panel.style.display === 'none' || panel.style.display === '') {
+            panel.style.display = 'block';
+            text.innerText = 'Ukryj opcje filtrowania';
+        } else {
+            panel.style.display = 'none';
+            text.innerText = 'Pokaż Filtrowanie i Sortowanie';
+        }
+    });
+</script>
+
+</body>
+</html>

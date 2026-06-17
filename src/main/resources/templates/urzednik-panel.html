@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Urzędnika</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .btn { padding: 10px 15px; background-color: #3634a8; color: #ffffff; text-decoration: none; font-weight: bold; margin-right: 10px; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
+        .btn-secondary { background-color: #6c757d; }
+    </style>
+</head>
+<body>
+<h1>Panel Urzędnika</h1>
+<div style="margin-top: 20px; margin-bottom: 30px; max-width: 600px;">
+    <a th:href="@{/admin/kategorie}" class="btn">Zarządzaj kategoriami</a>
+    <a th:href="@{/admin/osiedla}" class="btn">Zarządzaj osiedlami</a>
+    <br><br>
+    <a th:href="@{/projekty}" class="btn btn-secondary">Powrót do strony głównej</a>
+</div>
+</body>
+</html>
